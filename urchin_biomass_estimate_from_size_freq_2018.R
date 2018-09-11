@@ -84,11 +84,13 @@ selected.urchin.data <- raw.kelp.forest.survey.data %>%
     # Accomodate inconsistency in site naming.
     Site.adjusted = as.factor(str_replace(Site, "Faraday South", "Faraday S")),
     # Add column for area sampled. Area = 30 m Long x 2 m wide = 60 m.
-    TransectArea.m = 60,
+    TransectArea.m2 = 60,
     # Add column for estimated per capita biomass.
     # Formula for length-biomass conversion per LL 2018-09-05:  
     # 0.000968952467911056*(length.mm^2.791329)
-    Biomass.estimate.g = 0.000968952467911056*Size.adjusted.mm^2.791329
+    Biomass.estimate.g = 0.000968952467911056*Size.adjusted.mm^2.791329, 
+    # Add column for estimated biomass(g)/m2.
+    Biomass.g.per.m2 = Biomass.estimate.g / TransectArea.m2
     )   
 
 # Store urchin data grouped by site and plot. 
@@ -107,17 +109,24 @@ site.x.plot.size.freq.poly <- ggplot(data = site.x.plot.urchin.data, aes(Size.ad
 
 site.x.plot.size.freq.poly  
 
-# Visualize biomass estimate by site and plot.
-site.x.plot.biomass.freq.poly <- ggplot(data = site.x.plot.urchin.data, aes(Biomass.estimate.g, color = Plot)) +
-  geom_freqpoly(binwidth = 10) +
+# Export pdf of graph.
+ggsave("site.x.plot.size.freq.poly.pdf", site.x.plot.size.freq.poly, width = 10, height = 5)
+
+# Visualize biomass density estimate by site and plot.
+site.x.plot.biomass.density.hist <- ggplot(data = site.x.plot.urchin.data, aes(Biomass.g.per.m2, color = Plot)) +
+  geom_histogram(binwidth = 1) +
   facet_wrap(vars(Site.adjusted)) +
-  ggtitle(expression(paste("Estimated Biomass Frequency Distribution of ", italic("S. franciscanus")))) +
-  xlab("Estimated Biomass (g)") +
+  ggtitle(expression(paste("Estimated Biomass Density Frequency Distribution of ", italic("S. franciscanus")))) +
+  xlab(expression(paste("Estimated Biomass g/m"^2))) +
   ylab("Count") +
   scale_color_viridis(discrete = TRUE) +
   theme_classic()
 
-site.x.plot.biomass.freq.poly
+site.x.plot.biomass.density.hist
+
+# Export pdf of graph.
+ggsave("site.x.plot.biomass.density.hist.pdf", site.x.plot.biomass.density.hist, width = 10, height = 5)
+
 
 # Summarize data by site and plot.
 site.x.plot.summary <- summarise(site.x.plot.urchin.data, 
